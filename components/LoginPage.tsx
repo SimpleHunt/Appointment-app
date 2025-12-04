@@ -134,6 +134,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         </div>
         </div>
       </div>
-    </div>
+   </div>
   );
 }
