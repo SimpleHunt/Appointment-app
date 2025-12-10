@@ -10,6 +10,7 @@ import { EditReportModal } from '@/components/EditReportModal';
 import { Plus, FileText, CheckCircle, XCircle, Clock, Calendar } from 'lucide-react';
 import Footer from './Footer';
 
+
 interface InsideSalesDashboardProps {
   user: User;
   onLogout: () => void;
@@ -18,15 +19,27 @@ interface InsideSalesDashboardProps {
 export function InsideSalesDashboard({ user, onLogout }: InsideSalesDashboardProps) {
   const [activeTab, setActiveTab] = useState<'reports' | 'profile'>('reports');
   const [reports, setReports] = useState<Report[]>([]);
+  const [bdmList, setBdmList] = useState<{ id: string; name: string }[]>([]);
   const [showAddReportModal, setShowAddReportModal] = useState(false);
   const [showEditReportModal, setShowEditReportModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // fetch BDMS
+   const fetchBDMs = async () => {
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, name")
+      .eq("role", "bdm");
+
+    if (!error && data) {
+      setBdmList(data);
+    }
+  };
   useEffect(() => {
     fetchReports();
-    
-    // Set up real-time subscription for report updates
+    fetchBDMs(); 
+   
     const subscription = supabase
       .channel('reports_changes')
       .on('postgres_changes', 
@@ -65,6 +78,7 @@ export function InsideSalesDashboard({ user, onLogout }: InsideSalesDashboardPro
   const rejectedReports = reports.filter((r) => r.status === 'rejected');
   const rescheduledReports = reports.filter((r) => r.status === 'rescheduled');
 
+
   const handleEditReport = async (reportId: string, updatedData: any) => {
   const { error } = await supabase
     .from("reports")
@@ -75,7 +89,8 @@ export function InsideSalesDashboard({ user, onLogout }: InsideSalesDashboardPro
       scheduled_date: updatedData.scheduled_date,
       address: updatedData.address,
       description: updatedData.description,
-         lead_source:updatedData.lead_source,
+      lead_source:updatedData.lead_source,
+      scheduled_time: updatedData.scheduled_time,
       updated_at: new Date().toISOString()
     })
     .eq("id", reportId);
@@ -87,7 +102,7 @@ export function InsideSalesDashboard({ user, onLogout }: InsideSalesDashboardPro
   fetchReports();
   };
 
-  const handleAddReport = async (newReport: { company_name: string; contact_person: string; contact_number: string; scheduled_date:string; address : string; description: string;lead_source:string}) => {
+  const handleAddReport = async (newReport: { company_name: string; contact_person: string; contact_number: string; scheduled_date:string; address : string; description: string;lead_source:string;bdm_id:string;scheduled_time:string;}) => {
     const { data, error } = await supabase
       .from('reports')
       .insert([{
@@ -100,6 +115,8 @@ export function InsideSalesDashboard({ user, onLogout }: InsideSalesDashboardPro
         lead_source:newReport.lead_source,
         inside_sales_id: user.id,
         inside_sales_name: user.name,
+        bdm_id: newReport.bdm_id,
+        scheduled_time: newReport.scheduled_time,
         status: 'pending'
       }])
       .select()
@@ -264,6 +281,7 @@ export function InsideSalesDashboard({ user, onLogout }: InsideSalesDashboardPro
                           <h3 className="text-gray-900 mb-2">Contact Number: <span className={`${getStatusTextColor(report.status)}`} >{report.contact_number}</span></h3>
                           <h3 className="text-gray-900 mb-2">Address: <span className={`${getStatusTextColor(report.status)}`} >{report.address}</span></h3>
                           <h3 className="text-gray-900 mb-2">Scheduled Date: <span className={`${getStatusTextColor(report.status)}`} >{report.scheduled_date}</span></h3>
+                          <h3 className="text-gray-900 mb-2">Scheduled Time: <span className={`${getStatusTextColor(report.status)}`} >{report.scheduled_time}</span></h3>
                           <h3 className="text-gray-900 mb-2">Lead Source: <span className={`${getStatusTextColor(report.status)}`} >{report.lead_source}</span></h3>
                         <p className="text-gray-900 mb-3">Description: <span className={`${getStatusTextColor(report.status)}`} >{report.description}</span></p>
                         <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -292,6 +310,8 @@ export function InsideSalesDashboard({ user, onLogout }: InsideSalesDashboardPro
                     <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mt-4">
                       <p className="text-indigo-900 mb-1">BDM Feedback:</p>
                       <p className="text-indigo-900 mb-1">Rescheduled Date:  <span className="text-indigo-700" >{report.rescheduled_date}</span></p>
+                      <p className="text-indigo-900 mb-1">Rescheduled Date:  <span className="text-indigo-700" >{report.rescheduled_date}</span></p>
+                       <p className="text-indigo-900 mb-1">Reviewed by:  <span className="text-indigo-700" >{report.reviewed_by_name}</span></p>
                       <p className="text-indigo-900">Remarks: <span className="text-indigo-700" >{report.bdm_remarks}</span></p>
                     </div>
                   )}
@@ -323,6 +343,7 @@ export function InsideSalesDashboard({ user, onLogout }: InsideSalesDashboardPro
         <AddReportModal
           onClose={() => setShowAddReportModal(false)}
           onAdd={handleAddReport}
+          bdmList={bdmList}
         />
       )}
       {showEditReportModal && selectedReport && (

@@ -36,9 +36,12 @@ export interface Report {
   scheduled_date:string;
   bdm_remarks?: string;
   rescheduled_date:string;
+  scheduled_time:string;
+  rescheduled_time:string;
   lead_source:string;
   created_at: Date;
   updated_at: Date;
+  reviewed_by_name:string;
 }
 
 function App() {

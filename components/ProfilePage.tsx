@@ -8,16 +8,16 @@ interface ProfilePageProps {
 export function ProfilePage({ user }: ProfilePageProps) {
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white mb-47 rounded-xl shadow-sm border border-gray-200 overflow-hidden">
        
         
         <div className="px-8 pb-8">
           
           <div className="flex items-center  grid grid-cols-1 md:grid-cols-2 gap-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 pl-10  m-5 w-cover shadow-lg rounded-2xl object-cover ">
             <img
-              src={user.picture || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop'}
+              src={user.picture || '/legacylogo.png'}
               alt={user.name}
-              className="w-32 h-32 rounded-2xl object-cover mt-3 mb-3 border-4 border-white shadow-lg"
+              className="w-32 h-32 rounded-2xl object-cover mt-3 mb-3 bg-white border-4 border-white shadow-lg"
               
             />
             <div className="pb-4">

@@ -2,22 +2,34 @@
 
 import { useState } from 'react';
 import { Report } from '../app/page';
-import { X, CheckCircle, XCircle, Calendar } from 'lucide-react';
+import { X, CheckCircle, XCircle, Calendar, Share2 } from 'lucide-react';
 
 interface ReviewReportModalProps {
   report: Report;
   onClose: () => void;
-  onReview: (reportId: string, status: 'accepted' | 'rejected' | 'rescheduled', remarks: string,rescheduled_date:string,) => void;
+  onReview: (reportId: string, status: 'accepted' | 'rejected' | 'rescheduled', remarks: string,rescheduled_date:string,rescheduled_time: string,) => void;
+  onTransfer:(reportId: string, newBdmId: string)=>void;
+  bdmList: { id: string; name: string }[];
 }
 
-export function ReviewReportModal({ report, onClose, onReview }: ReviewReportModalProps) {
+export function ReviewReportModal({ report, onClose, onReview,onTransfer,bdmList }: ReviewReportModalProps) {
   const [status, setStatus] = useState<'accepted' | 'rejected' | 'rescheduled'>('accepted');
   const [remarks, setRemarks] = useState('');
-   const [rescheduled_date, setRescheduledDate] = useState('');
+  const [rescheduled_date, setRescheduledDate] = useState('');
+  const [rescheduled_time, setRescheduledtime] = useState('');
+
+  // Transfer State
+  const [showTransferBox, setShowTransferBox] = useState(false);
+  const [selectedBdm, setSelectedBdm] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onReview(report.id, status, remarks,rescheduled_date);
+    onReview(report.id, status, remarks,rescheduled_date,rescheduled_time);
+  };
+
+   const handleTransferSubmit = () => {
+    if (!selectedBdm) return alert("Please select a BDM");
+    onTransfer(report.id, selectedBdm);
   };
 
   return (
@@ -40,8 +52,43 @@ export function ReviewReportModal({ report, onClose, onReview }: ReviewReportMod
                 <h3 className="text-gray-900 mb-2">Contact Number: <span className="text-gray-600" >{report.contact_number}</span></h3>
                 <h3 className="text-gray-900 mb-2">Address: <span className="text-gray-600" >{report.address}</span></h3>
                 <h3 className="text-gray-900 mb-2">Scheduled Date: <span className="text-gray-600" >{report.scheduled_date}</span></h3>
+                <h3 className="text-gray-900 mb-2">Scheduled Date: <span className="text-gray-600" >{report.scheduled_time}</span></h3>
                 <h3 className="text-gray-900 mb-2">Lead Source: <span className="text-gray-600" >{report.lead_source}</span></h3>
                 <p className="text-gray-900 mb-3">Description: <span className="text-gray-600" >{report.description}</span></p>
+             {/* TRANSFER BUTTON */}
+          <button
+            type="button"
+            onClick={() => setShowTransferBox(!showTransferBox)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+          >
+            <Share2 className="w-5 h-5" />
+            Transfer Report to Another BDM
+          </button>
+
+          {/* TRANSFER BOX */}
+          {showTransferBox && (
+            <div className="border p-4 rounded-lg bg-yellow-50 space-y-4">
+              <select
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                value={selectedBdm}
+                onChange={(e) => setSelectedBdm(e.target.value)}
+              >
+                <option value="">Select BDM</option>
+                {bdmList.map((bdm) => (
+                  <option key={bdm.id} value={bdm.id}>
+                    {bdm.name}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                onClick={handleTransferSubmit}
+                className="w-full px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+              >
+                Transfer Now
+              </button>
+            </div>
+          )} 
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <span>Sales Rep: {report.inside_sales_name}</span>
               <span>•</span>
@@ -113,6 +160,20 @@ export function ReviewReportModal({ report, onClose, onReview }: ReviewReportMod
               type="Date"
               value={rescheduled_date}
               onChange={(e) => setRescheduledDate(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            required
+            />
+          </div>
+
+           <div>
+            <label htmlFor="schedule-time" className="block text-gray-700 mb-2">
+              Scheduled Time *
+            </label>
+            <input
+              id="schedule-time"
+              type="time"
+              value={rescheduled_time}
+              onChange={(e) => setRescheduledtime( e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               required
             />

@@ -5,10 +5,11 @@ import {  X } from 'lucide-react';
 
 interface AddReportModalProps {
   onClose: () => void;
-  onAdd: (report: { company_name: string; contact_person: string; contact_number: string; scheduled_date:string; address : string; description: string; lead_source:string; }) => void;
+  onAdd: (report: { company_name: string; contact_person: string; contact_number: string; scheduled_date:string; address : string; description: string; lead_source:string;bdm_id: string; scheduled_time:string;  }) => void;
+  bdmList:{id:string;name:string}[];
 }
 
-export function AddReportModal({ onClose, onAdd }: AddReportModalProps) {
+export function AddReportModal({ onClose, onAdd,bdmList }: AddReportModalProps) {
   const [formData, setFormData] = useState({
     company_name: '',
     contact_person:'',
@@ -17,6 +18,8 @@ export function AddReportModal({ onClose, onAdd }: AddReportModalProps) {
     address:'',
     description: '',
     lead_source:'',
+    bdm_id: "",
+    scheduled_time: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -24,10 +27,11 @@ export function AddReportModal({ onClose, onAdd }: AddReportModalProps) {
     onAdd(formData);
   };
 
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl max-w-2xl w-full">
-        <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+    <div className="fixed  inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white  max-w-2xl max-h-[90vh] overflow-y-auto  w-full rounded-xl">
+        <div className="border-b border-gray-200 px-2 py-2 flex items-center justify-between">
           <h2 className="text-gray-900">Create New Appointment</h2>
           <button
             onClick={onClose}
@@ -98,6 +102,20 @@ export function AddReportModal({ onClose, onAdd }: AddReportModalProps) {
           </div>
 
           <div>
+            <label htmlFor="schedule-time" className="block text-gray-700 mb-2">
+              Scheduled Time *
+            </label>
+            <input
+              id="schedule-time"
+              type="time"
+              value={formData.scheduled_time}
+              onChange={(e) => setFormData({ ...formData, scheduled_time: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              required
+            />
+          </div>
+
+          <div>
               <label htmlFor="source" className="block text-gray-700 mb-2">
                 Lead Source *
               </label>
@@ -112,6 +130,25 @@ export function AddReportModal({ onClose, onAdd }: AddReportModalProps) {
                 <option value="social media">Social Media</option>
               </select>
             </div>
+
+                <div>
+            <label className="block text-gray-700 mb-2">Assign to BDM *</label>
+            <select
+              value={formData.bdm_id}
+              onChange={(e) =>
+                setFormData({ ...formData, bdm_id: e.target.value })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              required
+            >
+              <option value="">Select BDM</option>
+              { bdmList.map((bdm) => (
+                <option key={bdm.id} value={bdm.id}>
+                  {bdm.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
            <div>
             <label htmlFor="address" className="block text-gray-700 mb-2">

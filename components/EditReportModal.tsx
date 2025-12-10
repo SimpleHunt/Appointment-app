@@ -10,6 +10,7 @@ interface EditReportModalProps {
     contact_person: string;
     contact_number: string;
     scheduled_date: string;
+    scheduled_time: string;
     lead_source:string;
     address: string;
     description: string;
@@ -22,6 +23,7 @@ interface EditReportModalProps {
       contact_person: string;
       contact_number: string;
       scheduled_date: string;
+       scheduled_time: string;
       lead_source:string
       address: string;
       description: string;
@@ -35,6 +37,7 @@ export function EditReportModal({ report, onClose, onEdit }: EditReportModalProp
     contact_person: report.contact_person,
     contact_number: report.contact_number,
     scheduled_date: report.scheduled_date,
+    scheduled_time: report.scheduled_time,
     lead_source:report.lead_source,
     address: report.address,
     description: report.description,
@@ -47,7 +50,7 @@ export function EditReportModal({ report, onClose, onEdit }: EditReportModalProp
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl max-w-2xl w-full">
+      <div className="bg-white  max-w-2xl max-h-[90vh] overflow-y-auto  w-full rounded-xl">
         <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h2 className="text-gray-900">Edit Appointment</h2>
           <button
@@ -103,6 +106,19 @@ export function EditReportModal({ report, onClose, onEdit }: EditReportModalProp
               type="date"
               value={formData.scheduled_date}
               onChange={(e) => setFormData({ ...formData, scheduled_date: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              required
+            />
+          </div>
+           <div>
+            <label htmlFor="schedule-time" className="block text-gray-700 mb-2">
+              Scheduled Time *
+            </label>
+            <input
+              id="schedule-time"
+              type="time"
+              value={formData.scheduled_time}
+              onChange={(e) => setFormData({ ...formData, scheduled_time: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               required
             />

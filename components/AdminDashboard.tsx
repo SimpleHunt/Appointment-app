@@ -178,7 +178,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                     <Clock className="w-6 h-6 text-yellow-600" />
                   </div>
                 </div>
-                <p className="text-gray-600 mb-1">Pending Reports</p>
+                <p className="text-gray-600 mb-1">Pending Appointments</p>
                 <p className="text-gray-900">{pendingReports}</p>
               </div>
 
@@ -188,7 +188,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                     <TrendingUp className="w-6 h-6 text-purple-600" />
                   </div>
                 </div>
-                <p className="text-gray-600 mb-1">Accepted Reports</p>
+                <p className="text-gray-600 mb-1">Accepted Appointments</p>
                 <p className="text-gray-900">{acceptedReports}</p>
               </div>
             </div>
@@ -241,7 +241,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                   {adminUsers.map((u) => (
                     <div key={u.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                       <img
-                        src={u.picture || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop'}
+                        src={u.picture || '/legacylogo.png'}
                         alt={u.name}
                         className="w-12 h-12 rounded-full object-cover"
                       />
@@ -264,7 +264,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                   {insideSalesUsers.map((u) => (
                     <div key={u.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                       <img
-                        src={u.picture || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop'}
+                        src={u.picture || '/legacylogo.png'}
                         alt={u.name}
                         className="w-12 h-12 rounded-full object-cover"
                       />
@@ -287,7 +287,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                   {bdmUsers.map((u) => (
                     <div key={u.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                       <img
-                        src={u.picture || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop'}
+                        src={u.picture || '/legacylogo.png'}
                         alt={u.name}
                         className="w-12 h-12 rounded-full object-cover"
                       />
@@ -346,6 +346,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                           <h3 className="text-gray-900 mb-2">Address: <span className="text-gray-600" >{report.address}</span></h3>
                           <h3 className="text-gray-900 mb-2">Scheduled Date: <span className="text-gray-600" >{report.scheduled_date}</span></h3>
                           <h3 className="text-gray-900 mb-2">Lead Source: <span className="text-gray-600" >{report.lead_source}</span></h3>
+                          <p className="text-indigo-900 mb-1">Reviewed by:  <span className="text-indigo-700" >{report.reviewed_by_name}</span></p>
                           <p className="text-gray-900 mb-3">Description: <span className="text-gray-600" >{report.description}</span></p>
                         </td>
                         <td className="px-6 py-4 text-gray-700">{report.inside_sales_name}</td>

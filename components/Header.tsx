@@ -47,9 +47,9 @@ export function Header({ user, onLogout }: HeaderProps) {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <img
-                src={user.picture || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop'}
+                src={user.picture || '/legacylogo.png'}
                 alt={user.name}
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-10 h-10 rounded-full object-cover shadow-lg border border-gray-200"
               />
               <div className="text-right">
                 <p className="text-gray-900">{user.name}</p>

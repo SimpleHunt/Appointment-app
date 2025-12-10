@@ -18,13 +18,15 @@ export function BDMDashboard({ user, onLogout }: BDMDashboardProps) {
   const [activeTab, setActiveTab] = useState<'reports' | 'profile'>('reports');
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [bdmList, setBdmList] = useState<{ id: string; name: string }[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'done'>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchReports();
+    fetchBDMs();
     
-    // Set up real-time subscription for new reports
+    
     const subscription = supabase
       .channel('all_reports_changes')
       .on('postgres_changes', 
@@ -48,6 +50,7 @@ export function BDMDashboard({ user, onLogout }: BDMDashboardProps) {
     const { data, error } = await supabase
       .from('reports')
       .select('*')
+      .eq("bdm_id", user.id)
       .order('created_at', { ascending: false });
 
     if (data && !error) {
@@ -55,6 +58,44 @@ export function BDMDashboard({ user, onLogout }: BDMDashboardProps) {
     }
     setLoading(false);
   };
+
+  const fetchBDMs = async () => {
+  const { data, error } = await supabase
+    .from("users")
+    .select("id, name, role")
+    .eq("role", "bdm"); 
+
+  if (data && !error) {
+    setBdmList(data as any);
+  }
+};
+
+const handleTransfer = async (reportId: string, newBdmId: string) => {
+  const { data, error } = await supabase
+    .from("reports")
+    .update({
+      bdm_id: newBdmId,
+      status: "pending", 
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", reportId)
+    .select()
+    .single();
+
+  if (error) {
+    alert("Failed to transfer report: " + error.message);
+    return;
+  }
+
+  alert("Report transferred successfully!");
+
+ 
+  setReports((prev) =>
+    prev.filter((r) => r.id !== reportId)
+  );
+
+  setSelectedReport(null);
+};
 
   const pendingReports = reports.filter((r) => r.status === 'pending');
   const doneReports = reports.filter((r) => r.status !== 'pending');
@@ -64,13 +105,15 @@ export function BDMDashboard({ user, onLogout }: BDMDashboardProps) {
     filter === 'done' ? doneReports :
     reports;
 
-  const handleReview = async (reportId: string, status: 'accepted' | 'rejected' | 'rescheduled', remarks: string,rescheduled_date:string) => {
+  const handleReview = async (reportId: string, status: 'accepted' | 'rejected' | 'rescheduled', remarks: string,rescheduled_date:string,rescheduled_time:string) => {
     const { data, error } = await supabase
       .from('reports')
       .update({
         status,
         bdm_remarks: remarks,
         rescheduled_date: rescheduled_date,
+        rescheduled_time: rescheduled_time,
+        reviewed_by_name: user.name,
         updated_at: new Date().toISOString()
       })
       .eq('id', reportId)
@@ -218,6 +261,7 @@ export function BDMDashboard({ user, onLogout }: BDMDashboardProps) {
                         <h3 className="text-gray-900">{report.contact_number}</h3>
                         <h3 className="text-gray-900">{report.address}</h3>
                         <h3 className="text-gray-900">{report.scheduled_date}</h3>
+                         <h3 className="text-gray-900">{report.scheduled_time}</h3>
                         <span className={`px-4 py-2 rounded-full ml-4 ${getStatusColor(report.status)} capitalize flex-shrink-0`}>
                           {report.status}
                         </span>
@@ -232,7 +276,8 @@ export function BDMDashboard({ user, onLogout }: BDMDashboardProps) {
                       {report.bdm_remarks && (
                         <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-4">
                           <p className="text-indigo-900 mb-1">Your Feedback:</p>
-                          <p className="text-indigo-700">Rescheduled: <span className="text-indigo-700" >{report.rescheduled_date}</span></p>
+                          <p className="text-indigo-700">Rescheduled Date: <span className="text-indigo-700" >{report.rescheduled_date}</span></p>
+                          <p className="text-indigo-700">Rescheduled Time: <span className="text-indigo-700" >{report.rescheduled_time}</span></p>
                           <p className="text-indigo-700">Remarks: <span className="text-indigo-700" >{report.bdm_remarks}</span></p>
                         </div>
                       )}
@@ -273,6 +318,8 @@ export function BDMDashboard({ user, onLogout }: BDMDashboardProps) {
           report={selectedReport}
           onClose={() => setSelectedReport(null)}
           onReview={handleReview}
+           onTransfer={handleTransfer}  
+           bdmList={bdmList} 
         />
       )}
       <Footer/>
