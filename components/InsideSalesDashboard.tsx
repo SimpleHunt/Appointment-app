@@ -182,6 +182,22 @@ export function InsideSalesDashboard({ user, onLogout }: InsideSalesDashboardPro
     );
   }
 
+  const Detail = ({
+  label,
+  value,
+  status,
+}: {
+  label: string;
+  value: string;
+  status: string;
+}) => (
+  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+    <span className="text-gray-500 min-w-[120px]">{label}:</span>
+    <span className={getStatusTextColor(status)}>{value}</span>
+  </div>
+);
+
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header user={user} onLogout={onLogout} />
@@ -214,7 +230,7 @@ export function InsideSalesDashboard({ user, onLogout }: InsideSalesDashboardPro
 
         {activeTab === 'reports' && (
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -269,54 +285,87 @@ export function InsideSalesDashboard({ user, onLogout }: InsideSalesDashboardPro
 
             <div className="space-y-4">
               {reports.map((report) => (
-                <div key={report.id} className={`bg-white rounded-xl shadow-sm border-2 ${getStatusColor(report.status)} p-6`}>
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div
+                  key={report.id}
+                  className={`bg-white rounded-xl shadow-sm border-2 ${getStatusColor(
+                    report.status
+                  )} p-4 sm:p-6`}
+                >
+                  {/* Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
                         {getStatusIcon(report.status)}
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-gray-900 mb-2">Company Name:   <span className={`${getStatusTextColor(report.status)}`} >{report.company_name}</span></h3>
-                          <h3 className="text-gray-900 mb-2">Contact Name:   <span className={`${getStatusTextColor(report.status)}`} >{report.contact_person}</span></h3>
-                          <h3 className="text-gray-900 mb-2">Contact Number: <span className={`${getStatusTextColor(report.status)}`} >{report.contact_number}</span></h3>
-                          <h3 className="text-gray-900 mb-2">Address: <span className={`${getStatusTextColor(report.status)}`} >{report.address}</span></h3>
-                          <h3 className="text-gray-900 mb-2">Scheduled Date: <span className={`${getStatusTextColor(report.status)}`} >{report.scheduled_date}</span></h3>
-                          <h3 className="text-gray-900 mb-2">Scheduled Time: <span className={`${getStatusTextColor(report.status)}`} >{report.scheduled_time}</span></h3>
-                          <h3 className="text-gray-900 mb-2">Lead Source: <span className={`${getStatusTextColor(report.status)}`} >{report.lead_source}</span></h3>
-                        <p className="text-gray-900 mb-3">Description: <span className={`${getStatusTextColor(report.status)}`} >{report.description}</span></p>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>Created: {new Date(report.created_at).toLocaleDateString()}</span>
-                          <span>Updated: {new Date(report.updated_at).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex justify-end mt-4">
-                          <button
-                            onClick={() => {
-                              setSelectedReport(report);
-                              setShowEditReportModal(true);
-                            }}
-                            className="px-4 py-2 text-indigo-600 border border-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors"
-                          >
-                            Edit
-                          </button>
-                        </div>
+
+                      <div>
+                        <p className="text-sm text-gray-500">Company</p>
+                        <p className={`font-semibold ${getStatusTextColor(report.status)}`}>
+                          {report.company_name}
+                        </p>
                       </div>
                     </div>
-                    <span className={`px-4 py-2 rounded-full ${getStatusColor(report.status)} capitalize`}>
+
+                    <span
+                      className={`self-start sm:self-auto px-3 py-1 rounded-full text-sm ${getStatusColor(
+                        report.status
+                      )} capitalize`}
+                    >
                       {report.status}
                     </span>
                   </div>
-                  
+
+                  {/* Details */}
+                  <div className="space-y-3 text-sm">
+                    <Detail label="Contact Name" value={report.contact_person} status={report.status} />
+                    <Detail label="Contact Number" value={report.contact_number} status={report.status} />
+                    <Detail label="Address" value={report.address} status={report.status} />
+                    <Detail label="Scheduled Date" value={report.scheduled_date} status={report.status} />
+                    <Detail label="Scheduled Time" value={report.scheduled_time} status={report.status} />
+                    <Detail label="Lead Source" value={report.lead_source} status={report.status} />
+                    <Detail label="Description" value={report.description} status={report.status} />
+                  </div>
+
+                  {/* Meta */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-4 text-xs text-gray-500">
+                    <span>Created: {new Date(report.created_at).toLocaleDateString()}</span>
+                    <span>Updated: {new Date(report.updated_at).toLocaleDateString()}</span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex justify-end mt-4">
+                    <button
+                      onClick={() => {
+                        setSelectedReport(report);
+                        setShowEditReportModal(true);
+                      }}
+                      className="w-full sm:w-auto px-4 py-2 text-indigo-600 border border-indigo-600 rounded-lg hover:bg-indigo-50"
+                    >
+                      Edit
+                    </button>
+                  </div>
+
+                  {/* BDM Remarks */}
                   {report.bdm_remarks && (
-                    <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mt-4">
-                      <p className="text-indigo-900 mb-1">BDM Feedback:</p>
-                      <p className="text-indigo-900 mb-1">Rescheduled Date:  <span className="text-indigo-700" >{report.rescheduled_date}</span></p>
-                      <p className="text-indigo-900 mb-1">Rescheduled Date:  <span className="text-indigo-700" >{report.rescheduled_date}</span></p>
-                       <p className="text-indigo-900 mb-1">Reviewed by:  <span className="text-indigo-700" >{report.reviewed_by_name}</span></p>
-                      <p className="text-indigo-900">Remarks: <span className="text-indigo-700" >{report.bdm_remarks}</span></p>
+                    <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mt-4 text-sm">
+                      <p className="font-medium text-indigo-900 mb-2">BDM Feedback</p>
+                      <p>
+                        Rescheduled Date:{" "}
+                        <span className="text-indigo-700">{report.rescheduled_date}</span>
+                      </p>
+                      <p>
+                        Reviewed by:{" "}
+                        <span className="text-indigo-700">{report.reviewed_by_name}</span>
+                      </p>
+                      <p>
+                        Remarks:{" "}
+                        <span className="text-indigo-700">{report.bdm_remarks}</span>
+                      </p>
                     </div>
                   )}
                 </div>
               ))}
+
 
               {reports.length === 0 && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
@@ -353,7 +402,10 @@ export function InsideSalesDashboard({ user, onLogout }: InsideSalesDashboardPro
             onEdit={handleEditReport}
           />
         )}
-        <Footer/>
+        <div className='pb-24'>
+          <Footer/>
+        </div>
+        
     </div>
   );
 };

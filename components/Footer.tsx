@@ -3,7 +3,7 @@ import Image from "next/image";
 export default function Footer() {
   return (
     <footer className="  fixed bottom-0 left-0 w-full py-5 bg-white border-t border-gray-200 z-50 text-center text-sm flex items-center justify-center gap-2">
-      <span className="text-gray-500">Legacy Innovations — 2025 ©</span>
+      <span className="text-gray-500">2025 © — Developed By</span>
 
       <Image
         src="/simpleHunt.png"

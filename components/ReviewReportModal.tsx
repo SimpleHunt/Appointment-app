@@ -1,33 +1,77 @@
 "use client";
 
-import { useState } from 'react';
-import { Report } from '../app/page';
-import { X, CheckCircle, XCircle, Calendar, Share2 } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Report } from "../app/page";
+import {
+  X,
+  CheckCircle,
+  XCircle,
+  Calendar,
+  Share2,
+} from "lucide-react";
 
 interface ReviewReportModalProps {
   report: Report;
   onClose: () => void;
-  onReview: (reportId: string, status: 'accepted' | 'rejected' | 'rescheduled', remarks: string,rescheduled_date:string,rescheduled_time: string,) => void;
-  onTransfer:(reportId: string, newBdmId: string)=>void;
+  onReview: (
+      reportId: string,
+      status: "accepted" | "rejected" | "rescheduled",
+      remarks: string | null,
+      rescheduled_date: string | null,
+      rescheduled_time: string | null
+    ) => void;
+
+  onTransfer: (reportId: string, newBdmId: string) => void;
   bdmList: { id: string; name: string }[];
 }
 
-export function ReviewReportModal({ report, onClose, onReview,onTransfer,bdmList }: ReviewReportModalProps) {
-  const [status, setStatus] = useState<'accepted' | 'rejected' | 'rescheduled'>('accepted');
-  const [remarks, setRemarks] = useState('');
-  const [rescheduled_date, setRescheduledDate] = useState('');
-  const [rescheduled_time, setRescheduledtime] = useState('');
+export function ReviewReportModal({
+  report,
+  onClose,
+  onReview,
+  onTransfer,
+  bdmList,
+}: ReviewReportModalProps) {
+  const [status, setStatus] = useState<
+    "accepted" | "rejected" | "rescheduled"
+  >("accepted");
 
-  // Transfer State
+  const [remarks, setRemarks] = useState("");
+  const [rescheduled_date, setRescheduledDate] = useState("");
+  const [rescheduled_time, setRescheduledTime] = useState("");
+
+  // Transfer state
   const [showTransferBox, setShowTransferBox] = useState(false);
   const [selectedBdm, setSelectedBdm] = useState("");
 
+  // Clear unused fields when status changes
+  useEffect(() => {
+    if (status === "accepted") {
+      setRemarks("");
+      setRescheduledDate("");
+      setRescheduledTime("");
+    }
+
+    if (status === "rejected") {
+      setRescheduledDate("");
+      setRescheduledTime("");
+    }
+  }, [status]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onReview(report.id, status, remarks,rescheduled_date,rescheduled_time);
+
+    onReview(
+      report.id,
+      status,
+      status === "accepted" ? null : remarks,
+      status === "rescheduled" ? rescheduled_date : null,
+      status === "rescheduled" ? rescheduled_time : null
+    );
   };
 
-   const handleTransferSubmit = () => {
+
+  const handleTransferSubmit = () => {
     if (!selectedBdm) return alert("Please select a BDM");
     onTransfer(report.id, selectedBdm);
   };
@@ -35,175 +79,157 @@ export function ReviewReportModal({ report, onClose, onReview,onTransfer,bdmList
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        {/* HEADER */}
+        <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
           <h2 className="text-gray-900">Review Appointment</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+            className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
         <div className="p-6 space-y-6">
+          {/* REPORT DETAILS */}
           <div className="bg-gray-50 rounded-lg p-6">
-                <h3 className="text-gray-900 mb-2">Company Name:   <span className="text-gray-600" >{report.company_name}</span></h3>
-                <h3 className="text-gray-900 mb-2">Contact Name:   <span className="text-gray-600" >{report.contact_person}</span></h3>
-                <h3 className="text-gray-900 mb-2">Contact Number: <span className="text-gray-600" >{report.contact_number}</span></h3>
-                <h3 className="text-gray-900 mb-2">Address: <span className="text-gray-600" >{report.address}</span></h3>
-                <h3 className="text-gray-900 mb-2">Scheduled Date: <span className="text-gray-600" >{report.scheduled_date}</span></h3>
-                <h3 className="text-gray-900 mb-2">Scheduled Date: <span className="text-gray-600" >{report.scheduled_time}</span></h3>
-                <h3 className="text-gray-900 mb-2">Lead Source: <span className="text-gray-600" >{report.lead_source}</span></h3>
-                <p className="text-gray-900 mb-3">Description: <span className="text-gray-600" >{report.description}</span></p>
-             {/* TRANSFER BUTTON */}
-          <button
-            type="button"
-            onClick={() => setShowTransferBox(!showTransferBox)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
-          >
-            <Share2 className="w-5 h-5" />
-            Transfer Report to Another BDM
-          </button>
+            <h3>Company Name: <span className="text-gray-600">{report.company_name}</span></h3>
+            <h3>Contact Name: <span className="text-gray-600">{report.contact_person}</span></h3>
+            <h3>Contact Number: <span className="text-gray-600">{report.contact_number}</span></h3>
+            <h3>Address: <span className="text-gray-600">{report.address}</span></h3>
+            <h3>Scheduled Date: <span className="text-gray-600">{report.scheduled_date}</span></h3>
+            <h3>Scheduled Time: <span className="text-gray-600">{report.scheduled_time}</span></h3>
+            <h3>Lead Source: <span className="text-gray-600">{report.lead_source}</span></h3>
+            <p>Description: <span className="text-gray-600">{report.description}</span></p>
 
-          {/* TRANSFER BOX */}
-          {showTransferBox && (
-            <div className="border p-4 rounded-lg bg-yellow-50 space-y-4">
-              <select
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                value={selectedBdm}
-                onChange={(e) => setSelectedBdm(e.target.value)}
-              >
-                <option value="">Select BDM</option>
-                {bdmList.map((bdm) => (
-                  <option key={bdm.id} value={bdm.id}>
-                    {bdm.name}
-                  </option>
-                ))}
-              </select>
+            {/* TRANSFER */}
+            <button
+              onClick={() => setShowTransferBox(!showTransferBox)}
+              className="w-full mt-4 flex items-center justify-center gap-2 bg-yellow-500 text-white px-4 py-3 rounded-lg hover:bg-yellow-600"
+            >
+              <Share2 className="w-5 h-5" />
+              Transfer Report to Another BDM
+            </button>
 
-              <button
-                onClick={handleTransferSubmit}
-                className="w-full px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
-              >
-                Transfer Now
-              </button>
-            </div>
-          )} 
-            <div className="flex items-center gap-4 text-sm text-gray-500">
-              <span>Sales Rep: {report.inside_sales_name}</span>
-              <span>•</span>
-              <span>Created: {new Date(report.created_at).toLocaleDateString()}</span>
-            </div>
+            {showTransferBox && (
+              <div className="mt-4 p-4 bg-yellow-50 rounded-lg space-y-3">
+                <select
+                  className="w-full border px-4 py-2 rounded-lg"
+                  value={selectedBdm}
+                  onChange={(e) => setSelectedBdm(e.target.value)}
+                >
+                  <option value="">Select BDM</option>
+                  {bdmList.map((bdm) => (
+                    <option key={bdm.id} value={bdm.id}>
+                      {bdm.name}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  onClick={handleTransferSubmit}
+                  className="w-full bg-yellow-600 text-white px-4 py-3 rounded-lg hover:bg-yellow-700"
+                >
+                  Transfer Now
+                </button>
+              </div>
+            )}
           </div>
 
+          {/* FORM */}
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* STATUS */}
             <div>
-              <label className="block text-gray-700 mb-3">
-                Feedback Status *
-              </label>
+              <label className="block text-gray-700 mb-3">Feedback Status *</label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {/* ACCEPT */}
                 <button
                   type="button"
-                  onClick={() => setStatus('accepted')}
-                  className={`flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${
-                    status === 'accepted'
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-gray-200 hover:border-green-300'
+                  onClick={() => setStatus("accepted")}
+                  className={`p-4 border-2 rounded-lg flex gap-3 ${
+                    status === "accepted"
+                      ? "border-green-500 bg-green-50"
+                      : "border-gray-200"
                   }`}
                 >
-                  <CheckCircle className={`w-6 h-6 ${status === 'accepted' ? 'text-green-600' : 'text-gray-400'}`} />
-                  <div className="text-left">
-                    <p className="text-gray-900">Accepted</p>
-                    <p className="text-gray-600 text-sm">Approve report</p>
-                  </div>
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  Accepted
                 </button>
 
+                {/* RESCHEDULE */}
                 <button
                   type="button"
-                  onClick={() => setStatus('rescheduled')}
-                  className={`flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${
-                    status === 'rescheduled'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-300'
+                  onClick={() => setStatus("rescheduled")}
+                  className={`p-4 border-2 rounded-lg flex gap-3 ${
+                    status === "rescheduled"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200"
                   }`}
                 >
-                  <Calendar className={`w-6 h-6 ${status === 'rescheduled' ? 'text-blue-600' : 'text-gray-400'}`} />
-                  <div className="text-left">
-                    <p className="text-gray-900">Reschedule</p>
-                    <p className="text-gray-600 text-sm">Follow up later</p>
-                  </div>
+                  <Calendar className="w-6 h-6 text-blue-600" />
+                  Rescheduled
                 </button>
 
+                {/* REJECT */}
                 <button
                   type="button"
-                  onClick={() => setStatus('rejected')}
-                  className={`flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${
-                    status === 'rejected'
-                      ? 'border-red-500 bg-red-50'
-                      : 'border-gray-200 hover:border-red-300'
+                  onClick={() => setStatus("rejected")}
+                  className={`p-4 border-2 rounded-lg flex gap-3 ${
+                    status === "rejected"
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-200"
                   }`}
                 >
-                  <XCircle className={`w-6 h-6 ${status === 'rejected' ? 'text-red-600' : 'text-gray-400'}`} />
-                  <div className="text-left">
-                    <p className="text-gray-900">Rejected</p>
-                    <p className="text-gray-600 text-sm">Decline report</p>
-                  </div>
+                  <XCircle className="w-6 h-6 text-red-600" />
+                  Rejected
                 </button>
               </div>
             </div>
-                <div>
-            <label htmlFor="title" className="block text-gray-700 mb-2">
-              Rescheduled Date *
-            </label>
-            <input
-              id="title"
-              type="Date"
-              value={rescheduled_date}
-              onChange={(e) => setRescheduledDate(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            required
-            />
-          </div>
 
-           <div>
-            <label htmlFor="schedule-time" className="block text-gray-700 mb-2">
-              Scheduled Time *
-            </label>
-            <input
-              id="schedule-time"
-              type="time"
-              value={rescheduled_time}
-              onChange={(e) => setRescheduledtime( e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              required
-            />
-          </div>
+            {/* RESCHEDULE FIELDS */}
+            {status === "rescheduled" && (
+              <>
+                <input
+                  type="date"
+                  value={rescheduled_date}
+                  onChange={(e) => setRescheduledDate(e.target.value)}
+                  className="w-full border px-4 py-2 rounded-lg"
+                  required
+                />
 
-            <div>
-              <label htmlFor="remarks" className="block text-gray-700 mb-2">
-                Remarks *
-              </label>
+                <input
+                  type="time"
+                  value={rescheduled_time}
+                  onChange={(e) => setRescheduledTime(e.target.value)}
+                  className="w-full border px-4 py-2 rounded-lg"
+                  required
+                />
+              </>
+            )}
+
+            {/* REMARKS */}
+            {(status === "rescheduled" || status === "rejected") && (
               <textarea
-                id="remarks"
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent min-h-32"
-                placeholder="Provide your feedback and suggestions for the sales representative"
+                className="w-full border px-4 py-2 rounded-lg min-h-32"
+                placeholder="Enter remarks"
                 required
               />
-            </div>
+            )}
 
-            <div className="flex gap-3 pt-4">
+            {/* ACTIONS */}
+            <div className="flex gap-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex-1 border px-6 py-3 rounded-lg"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                className="flex-1 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700"
               >
                 Submit Review
               </button>

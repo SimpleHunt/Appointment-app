@@ -105,7 +105,10 @@ const handleTransfer = async (reportId: string, newBdmId: string) => {
     filter === 'done' ? doneReports :
     reports;
 
-  const handleReview = async (reportId: string, status: 'accepted' | 'rejected' | 'rescheduled', remarks: string,rescheduled_date:string,rescheduled_time:string) => {
+  const handleReview = async (reportId: string, status: 'accepted' | 'rejected' | 'rescheduled', remarks: string | null,
+    rescheduled_date: string | null,
+      rescheduled_time: string | null
+  ) => {
     const { data, error } = await supabase
       .from('reports')
       .update({
@@ -151,6 +154,14 @@ const handleTransfer = async (reportId: string, newBdmId: string) => {
     );
   }
 
+  const Detail = ({ label, value }: { label: string; value: string }) => (
+  <div className="flex flex-col sm:flex-row sm:gap-2">
+    <span className="text-gray-500 min-w-[130px]">{label}:</span>
+    <span className="text-gray-900">{value}</span>
+  </div>
+);
+
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header user={user} onLogout={onLogout} />
@@ -181,7 +192,7 @@ const handleTransfer = async (reportId: string, newBdmId: string) => {
 
         {activeTab === 'reports' && (
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -251,49 +262,75 @@ const handleTransfer = async (reportId: string, newBdmId: string) => {
 
             <div className="space-y-4">
               {filteredReports.map((report) => (
-                <div key={report.id} className={`bg-white rounded-xl shadow-sm border-2 ${getStatusColor(report.status)} p-6`}>
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        
-                        <h3 className="text-gray-900">{report.company_name}</h3>
-                        <h3 className="text-gray-900">{report.contact_person}</h3>
-                        <h3 className="text-gray-900">{report.contact_number}</h3>
-                        <h3 className="text-gray-900">{report.address}</h3>
-                        <h3 className="text-gray-900">{report.scheduled_date}</h3>
-                         <h3 className="text-gray-900">{report.scheduled_time}</h3>
-                        <span className={`px-4 py-2 rounded-full ml-4 ${getStatusColor(report.status)} capitalize flex-shrink-0`}>
-                          {report.status}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 mb-3">{report.description}</p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                        <span>Sales Appoinment: {report.inside_sales_name}</span>
-                        <span>•</span>
-                        <span>Created: {new Date(report.created_at).toLocaleDateString()}</span>
+                  <div
+                    key={report.id}
+                    className={`bg-white rounded-xl shadow-sm border-2 ${getStatusColor(
+                      report.status
+                    )} p-4 sm:p-6`}
+                  >
+                    {/* Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Company Name: {report.company_name}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          Contact Person {report.contact_person} 
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Contact: {report.contact_number}
+                        </p>
                       </div>
 
-                      {report.bdm_remarks && (
-                        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-4">
-                          <p className="text-indigo-900 mb-1">Your Feedback:</p>
-                          <p className="text-indigo-700">Rescheduled Date: <span className="text-indigo-700" >{report.rescheduled_date}</span></p>
-                          <p className="text-indigo-700">Rescheduled Time: <span className="text-indigo-700" >{report.rescheduled_time}</span></p>
-                          <p className="text-indigo-700">Remarks: <span className="text-indigo-700" >{report.bdm_remarks}</span></p>
-                        </div>
-                      )}
-
-                      {report.status === 'pending' && (
-                        <button
-                          onClick={() => setSelectedReport(report)}
-                          className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-                        >
-                          Review Appointment
-                        </button>
-                      )}
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm ${getStatusColor(
+                          report.status
+                        )} capitalize self-start sm:self-auto`}
+                      >
+                        {report.status}
+                      </span>
                     </div>
+
+                    {/* Details */}
+                    <div className="space-y-2 text-sm mb-4">
+                      <Detail label="Address" value={report.address} />
+                      <Detail label="Scheduled Date" value={report.scheduled_date} />
+                      <Detail label="Scheduled Time" value={report.scheduled_time} />
+                      <Detail label="Sales Appointment" value={report.inside_sales_name} />
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-gray-600 text-sm mb-4">
+                      {report.description}
+                    </p>
+
+                    {/* Meta */}
+                    <div className="text-xs text-gray-500 mb-4">
+                      Created: {new Date(report.created_at).toLocaleDateString()}
+                    </div>
+
+                    {/* BDM Feedback */}
+                    {report.bdm_remarks && (
+                      <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-4 text-sm">
+                        <p className="font-medium text-indigo-900 mb-2">Your Feedback</p>
+                        <p>Rescheduled Date: <span className="text-indigo-700">{report.rescheduled_date}</span></p>
+                        <p>Rescheduled Time: <span className="text-indigo-700">{report.rescheduled_time}</span></p>
+                        <p>Remarks: <span className="text-indigo-700">{report.bdm_remarks}</span></p>
+                      </div>
+                    )}
+
+                    {/* Action */}
+                    {report.status === "pending" && (
+                      <button
+                        onClick={() => setSelectedReport(report)}
+                        className="w-full sm:w-auto bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                      >
+                        Review Appointment
+                      </button>
+                    )}
                   </div>
-                </div>
-              ))}
+                ))}
+
 
               {filteredReports.length === 0 && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
@@ -322,7 +359,9 @@ const handleTransfer = async (reportId: string, newBdmId: string) => {
            bdmList={bdmList} 
         />
       )}
-      <Footer/>
+      <div className='pb-24'>
+          <Footer/>
+        </div>
     </div>
   );
 }

@@ -106,52 +106,32 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
       <div className="max-w-7xl mx-auto px-4 py-8">
         
 
-        <div className="flex gap-2 mb-8 border-b border-gray-200">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`px-6 py-3 border-b-2 transition-colors ${
-              activeTab === 'dashboard'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Dashboard
-          </button>
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`px-6 py-3 border-b-2 transition-colors ${
-              activeTab === 'users'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Users
-          </button>
-          <button
-            onClick={() => setActiveTab('reports')}
-            className={`px-6 py-3 border-b-2 transition-colors ${
-              activeTab === 'reports'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Appoinments
-          </button>
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`px-6 py-3 border-b-2 transition-colors ${
-              activeTab === 'profile'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Profile
-          </button>
+        {/* ================= TABS ================= */}
+        <div className="flex gap-6 border-b mb-6 overflow-x-auto whitespace-nowrap scrollbar-hide">
+          {["dashboard", "users", "reports", "profile"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab as any)}
+              className={`pb-3 px-2 text-sm sm:text-base border-b-2 ${
+                activeTab === tab
+                  ? "border-indigo-600 text-indigo-600"
+                  : "border-transparent text-gray-600"
+              }`}
+            >
+              {tab === "dashboard"
+                ? "Dashboard"
+                : tab === "users"
+                ? "Users"
+                : tab === "reports"
+                ? "Appointments"
+                : "Profile"}
+            </button>
+          ))}
         </div>
 
         {activeTab === 'dashboard' && (
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
@@ -197,25 +177,54 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
               <h2 className="text-gray-900 mb-6">Recent Activity</h2>
               <div className="space-y-4">
                 {reports.slice(0, 5).map((report) => (
-                  <div key={report.id} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
-                    <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div
+                    key={report.id}
+                    className="flex gap-3 p-4 bg-gray-50 rounded-lg"
+                  >
+                    {/* Icon */}
+                    <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center shrink-0">
                       <FileText className="w-5 h-5 text-indigo-600" />
                     </div>
+
+                    {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4 mb-1">
-                         <h3 className="text-gray-900">{report.company_name}</h3>
-                         <h3 className="text-gray-900">{report.contact_person}</h3>
-                         <h3 className="text-gray-900">{report.contact_number}</h3>
-                         <h3 className="text-gray-900">{report.address}</h3>
-                        <span className={`px-3 py-1 rounded-full text-sm flex-shrink-0 ${getStatusColor(report.status)}`}>
+                      {/* Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
+                        <div>
+                          <h3 className="text-gray-900 font-medium truncate">
+                            Company Name: {report.company_name}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            Contact Person: {report.contact_person} 
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Contact Number: {report.contact_number}
+                          </p>
+                        </div>
+
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs shrink-0 ${getStatusColor(
+                            report.status
+                          )}`}
+                        >
                           {report.status}
                         </span>
                       </div>
-                      <p className="text-gray-600 mb-2">{report.inside_sales_name}</p>
-                      <p className="text-gray-500 text-sm">{new Date(report.created_at).toLocaleDateString()}</p>
+
+                      {/* Details */}
+                      <div className="space-y-1 text-sm text-gray-600 mb-2">
+                        <p className="truncate">Address: {report.address}</p>
+                        <p>Sales: {report.inside_sales_name}</p>
+                      </div>
+
+                      {/* Meta */}
+                      <p className="text-gray-500 text-xs">
+                        {new Date(report.created_at).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
                 ))}
+
               </div>
             </div>
           </div>
@@ -374,7 +383,9 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
           onAdd={handleAddUser}
         />
       )}
-      <Footer/>
+      <div className='pb-24'>
+          <Footer/>
+        </div>
     </div>
   );
 }
